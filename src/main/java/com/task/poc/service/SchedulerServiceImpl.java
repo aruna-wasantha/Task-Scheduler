@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Service implementation for scheduling tasks.
@@ -23,10 +24,10 @@ import java.util.UUID;
 public class SchedulerServiceImpl implements SchedulerService {
 
     @Autowired
-    ModelMapper mapper;
+    private ModelMapper mapper;
 
     @Autowired
-    SchedulerRepository repository;
+    private SchedulerRepository repository;
 
 
     /**
@@ -37,35 +38,37 @@ public class SchedulerServiceImpl implements SchedulerService {
      */
     @Override
     public ResponseEntity<ScheduleDTO> createSchedule(ScheduleRequestDTO request) {
-        log.debug("Starting createSchedule method.");
+        log.debug("Entering createSchedule method with request: {}", request);
 
         try {
-            // Creating response object.
-            ScheduleDTO scheduleDTO = new ScheduleDTO();
-
+            // Creating a new schedule entity from the request DTO
             Schedule schedule = mapper.map(request, Schedule.class);
 
-            // Generate a unique id.
+            // Generate a unique ID for the schedule
             schedule.setId(UUID.randomUUID().toString());
-            // Set current date as creation date.
+            // set trigger date time
+            schedule.setStartDateTime(request.getStartDateTime());
+            // Set current date as creation date
             schedule.setCreateDate(new Date());
-            // While create last updated is the creation date.
+            // Set the current date as the last update date
             schedule.setUpdateDate(new Date());
 
+            // Save the new schedule in the repository
             Schedule newSchedule = repository.save(schedule);
 
-            scheduleDTO = mapper.map(newSchedule, ScheduleDTO.class);
+            // Map the saved entity to a DTO for returning
+            ScheduleDTO scheduleDTO = mapper.map(newSchedule, ScheduleDTO.class);
 
-            // Log info after successful creation
-            log.info("Schedule creation successful with ID: {}", scheduleDTO.getId());
+            // Log info after successful schedule creation
+            log.info("Successfully created schedule with ID: {}", scheduleDTO.getId());
 
-            // Returning the created schedule with a 200 OK response
+            // Return a successful response with the created schedule DTO
             return ResponseEntity.ok(scheduleDTO);
         } catch (Exception ex) {
-            // Log error with exception details if something goes wrong
-            log.error("Schedule creation failed. Exception: ", ex);
+            // Log error if creation fails
+            log.error("Failed to create schedule. Exception: ", ex);
 
-            // Return an internal server error response with an empty ScheduleDTO
+            // Return internal server error response
             return ResponseEntity.internalServerError().body(new ScheduleDTO());
         }
     }
@@ -77,25 +80,35 @@ public class SchedulerServiceImpl implements SchedulerService {
      */
     @Override
     public ResponseEntity<ScheduleListDTO> getAllSchedules() {
-        log.debug("Starting getAllSchedules method.");
+        log.debug("Entering getAllSchedules method.");
 
         try {
-            // Simulating fetching all schedules
+            // Fetch all schedules from the repository
+            Iterable<Schedule> schedules = repository.findAll();
+
+            // Convert the schedules to ScheduleDTO list using stream and collect
+            List<ScheduleDTO> scheduleDTOList = StreamSupport.stream(schedules.spliterator(), false)
+                    .map(schedule -> mapper.map(schedule, ScheduleDTO.class))
+                    .collect(Collectors.toList());
+
+            // Create ScheduleListDTO and set the list of schedules
             ScheduleListDTO scheduleListDTO = new ScheduleListDTO();
+            scheduleListDTO.setScheduleDTOList(scheduleDTOList);
 
-            // Log info after successfully fetching the schedules
-            log.info("Successfully fetched all schedules.");
+            // Log info after fetching schedules successfully
+            log.info("Successfully fetched all schedules. Total count: {}", scheduleDTOList.size());
 
-            // Return the list of schedules
+            // Return a successful response with the list of schedules
             return ResponseEntity.ok(scheduleListDTO);
         } catch (Exception ex) {
-            // Log error with exception details if something goes wrong
+            // Log error if fetching all schedules fails
             log.error("Failed to fetch all schedules. Exception: ", ex);
 
-            // Return an internal server error response with an empty ScheduleListDTO
+            // Return internal server error response
             return ResponseEntity.internalServerError().body(new ScheduleListDTO());
         }
     }
+
 
     /**
      * Retrieves a schedule by its ID.
@@ -105,22 +118,28 @@ public class SchedulerServiceImpl implements SchedulerService {
      */
     @Override
     public ResponseEntity<ScheduleDTO> getScheduleById(String id) {
-        log.debug("Starting getScheduleById method. Schedule ID: {}", id);
+        log.debug("Entering getScheduleById method. Schedule ID: {}", id);
 
         try {
-            // Simulating fetching a schedule by its ID
-            ScheduleDTO scheduleDTO = new ScheduleDTO();
+            // Fetch the schedule by ID from the repository
+            Optional<Schedule> scheduleOptional = repository.findById(id);
 
-            // Log info after successfully fetching the schedule by ID
-            log.info("Successfully fetched schedule by ID: {}", id);
-
-            // Return the schedule data
-            return ResponseEntity.ok(scheduleDTO);
+            // Check if schedule exists
+            if (scheduleOptional.isPresent()) {
+                // Map the found entity to a DTO
+                ScheduleDTO scheduleDTO = mapper.map(scheduleOptional.get(), ScheduleDTO.class);
+                log.info("Successfully fetched schedule by ID: {}", id);
+                return ResponseEntity.ok(scheduleDTO);
+            } else {
+                // Log warning if schedule not found
+                log.warn("Schedule with ID {} not found.", id);
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception ex) {
-            // Log error with exception details if fetching the schedule by ID fails
+            // Log error if fetching the schedule fails
             log.error("Failed to fetch schedule by ID. Exception: ", ex);
 
-            // Return an internal server error response with an empty ScheduleDTO
+            // Return internal server error response
             return ResponseEntity.internalServerError().body(new ScheduleDTO());
         }
     }
@@ -134,22 +153,36 @@ public class SchedulerServiceImpl implements SchedulerService {
      */
     @Override
     public ResponseEntity<ScheduleDTO> updateSchedule(String id, ScheduleRequestDTO request) {
-        log.debug("Starting updateSchedule method. Schedule ID: {}", id);
+        log.debug("Entering updateSchedule method. Schedule ID: {}, Request: {}", id, request);
 
         try {
-            // Simulating updating the schedule based on the request
-            ScheduleDTO updatedSchedule = new ScheduleDTO();
+            // Fetch the schedule to update by ID
+            Optional<Schedule> scheduleOptional = repository.findById(id);
 
-            // Log info after successful update
-            log.info("Schedule update successful for ID: {}", id);
+            if (scheduleOptional.isPresent()) {
+                // Map the existing schedule and update the fields
+                Schedule schedule = scheduleOptional.get();
+                mapper.map(request, schedule);  // Map the request data into the schedule object
+                schedule.setUpdateDate(new Date()); // Update the last modified date
 
-            // Return the updated schedule
-            return ResponseEntity.ok(updatedSchedule);
+                // Save the updated schedule
+                Schedule updatedSchedule = repository.save(schedule);
+
+                // Map the updated schedule to a DTO for returning
+                ScheduleDTO scheduleDTO = mapper.map(updatedSchedule, ScheduleDTO.class);
+
+                log.info("Successfully updated schedule with ID: {}", id);
+                return ResponseEntity.ok(scheduleDTO);
+            } else {
+                // Log warning if schedule not found
+                log.warn("Schedule with ID {} not found for update.", id);
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception ex) {
-            // Log error with exception details if something goes wrong
-            log.error("Schedule update failed. Exception: ", ex);
+            // Log error if updating the schedule fails
+            log.error("Failed to update schedule. Exception: ", ex);
 
-            // Return an internal server error response with an empty ScheduleDTO
+            // Return internal server error response
             return ResponseEntity.internalServerError().body(new ScheduleDTO());
         }
     }
@@ -162,19 +195,31 @@ public class SchedulerServiceImpl implements SchedulerService {
      */
     @Override
     public ResponseEntity<String> deleteSchedule(String id) {
-        log.debug("Starting deleteSchedule method. Schedule ID: {}", id);
+        log.debug("Entering deleteSchedule method. Schedule ID: {}", id);
 
         try {
-            // Simulating schedule deletion
-            log.info("Schedule deletion successful for ID: {}", id);
+            // Check if the schedule exists
+            Optional<Schedule> scheduleOptional = repository.findById(id);
 
-            // Return a success message after deletion
-            return ResponseEntity.ok("Schedule deleted successfully.");
+            if (scheduleOptional.isPresent()) {
+                // Delete the schedule from the repository
+                repository.delete(scheduleOptional.get());
+
+                // Log info after successful deletion
+                log.info("Successfully deleted schedule with ID: {}", id);
+
+                // Return success message after deletion
+                return ResponseEntity.ok("Schedule deleted successfully.");
+            } else {
+                // Log warning if schedule not found
+                log.warn("Schedule with ID {} not found for deletion.", id);
+                return ResponseEntity.notFound().build();
+            }
         } catch (Exception ex) {
-            // Log error with exception details if something goes wrong
-            log.error("Schedule deletion failed. Exception: ", ex);
+            // Log error if deletion fails
+            log.error("Failed to delete schedule. Exception: ", ex);
 
-            // Return an internal server error response with an error message
+            // Return internal server error response
             return ResponseEntity.internalServerError().body("Failed to delete schedule.");
         }
     }

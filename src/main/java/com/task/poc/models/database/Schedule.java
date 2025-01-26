@@ -25,5 +25,6 @@ public class Schedule {
     private Date startDateTime;
     private Date createDate;
     private Date updateDate;
+    private boolean executed;
     private ScheduleInfoDTO info;
 }

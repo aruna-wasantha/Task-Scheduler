@@ -9,6 +9,4 @@ spring:
     name: poc
   data:
     mongodb:
-      uri: mongodb://saastaq:SaasAdm_9808@localhost:27017/?authSource=admin
-      database: schedules
-      auto-index-creation: true
+      uri: mongodb://localhost:27017/schedules
