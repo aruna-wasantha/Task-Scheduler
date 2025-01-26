@@ -194,7 +194,7 @@ public class SchedulerServiceImpl implements SchedulerService {
      * @return ResponseEntity containing a success message
      */
     @Override
-    public ResponseEntity<String> deleteSchedule(String id) {
+    public ResponseEntity<?> deleteSchedule(String id) {
         log.debug("Entering deleteSchedule method. Schedule ID: {}", id);
 
         try {
@@ -209,7 +209,7 @@ public class SchedulerServiceImpl implements SchedulerService {
                 log.info("Successfully deleted schedule with ID: {}", id);
 
                 // Return success message after deletion
-                return ResponseEntity.ok("Schedule deleted successfully.");
+                return ResponseEntity.noContent().build();
             } else {
                 // Log warning if schedule not found
                 log.warn("Schedule with ID {} not found for deletion.", id);

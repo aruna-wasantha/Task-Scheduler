@@ -15,5 +15,5 @@ public interface SchedulerService {
 
     ResponseEntity<ScheduleDTO> updateSchedule(String id, ScheduleRequestDTO request);
 
-    ResponseEntity<String> deleteSchedule(String id);
+    ResponseEntity<?> deleteSchedule(String id);
 }

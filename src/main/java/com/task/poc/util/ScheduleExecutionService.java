@@ -4,8 +4,11 @@ import com.task.poc.models.database.Schedule;
 import com.task.poc.repository.SchedulerRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Instant;
 import java.util.Date;
@@ -73,7 +76,7 @@ public class ScheduleExecutionService {
 
         try {
             // Log the payload (info field) as an example execution
-            log.info("Executing task with payload: {}", schedule.getInfo());
+            log.info("Executing task with payload: {}", schedule.getInfo().toString());
 
             // Simulate a mock external API call or actual task execution
             mockExternalApiCall(schedule);
@@ -96,15 +99,26 @@ public class ScheduleExecutionService {
      * @param schedule The schedule whose task is being executed.
      */
     private void mockExternalApiCall(Schedule schedule) {
-        // Simulate an external API call or task execution
+        // Simulate an external API call for schedule with ID
         log.info("Simulating external API call for schedule with ID: {}", schedule.getId());
 
-        // Add your actual logic here (e.g., send an HTTP request or perform a specific task)
+        // Create the URL with the schedule ID as a query parameter
+        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:3000/your-endpoint")
+                .queryParam("id", schedule.getId())
+                .toUriString();
+
+        // Create a RestTemplate instance
+        RestTemplate restTemplate = new RestTemplate();
+
         try {
-            Thread.sleep(1000); // Simulate a delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Mock external API call was interrupted.");
+            // Send a GET request to the local endpoint with the schedule ID as a query parameter
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+            // Log the response (or handle as needed)
+            log.info("Response from external API: {}", response.getStatusCode());
+
+        } catch (Exception e) {
+            log.error("Error while calling external API: {}", e.getMessage());
         }
     }
 }
