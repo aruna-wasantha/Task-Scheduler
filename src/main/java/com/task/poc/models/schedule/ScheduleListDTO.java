@@ -1,4 +1,4 @@
-package com.task.poc.models.dto.schedule;
+package com.task.poc.models.schedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

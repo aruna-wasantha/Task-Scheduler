@@ -1,4 +1,4 @@
-package com.task.poc.models.dto.other;
+package com.task.poc.models.common;
 
 public enum Category {
     WORK,

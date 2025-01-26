@@ -1,6 +1,6 @@
 package com.task.poc.controller;
 
-import com.task.poc.models.dto.schedule.ScheduleRequestDTO;
+import com.task.poc.models.schedule.ScheduleRequestDTO;
 import com.task.poc.service.SchedulerService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

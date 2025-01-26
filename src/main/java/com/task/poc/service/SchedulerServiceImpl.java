@@ -1,11 +1,18 @@
 package com.task.poc.service;
 
-import com.task.poc.models.dto.schedule.ScheduleDTO;
-import com.task.poc.models.dto.schedule.ScheduleListDTO;
-import com.task.poc.models.dto.schedule.ScheduleRequestDTO;
+import com.task.poc.models.database.Schedule;
+import com.task.poc.models.schedule.ScheduleDTO;
+import com.task.poc.models.schedule.ScheduleListDTO;
+import com.task.poc.models.schedule.ScheduleRequestDTO;
+import com.task.poc.repository.SchedulerRepository;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Service implementation for scheduling tasks.
@@ -14,6 +21,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Log4j2 // Log4j 2 integration using Lombok for logging
 public class SchedulerServiceImpl implements SchedulerService {
+
+    @Autowired
+    ModelMapper mapper;
+
+    @Autowired
+    SchedulerRepository repository;
+
 
     /**
      * Creates a new schedule based on the given request.
@@ -26,8 +40,21 @@ public class SchedulerServiceImpl implements SchedulerService {
         log.debug("Starting createSchedule method.");
 
         try {
-            // Creating a new ScheduleDTO (simulating creation process)
+            // Creating response object.
             ScheduleDTO scheduleDTO = new ScheduleDTO();
+
+            Schedule schedule = mapper.map(request, Schedule.class);
+
+            // Generate a unique id.
+            schedule.setId(UUID.randomUUID().toString());
+            // Set current date as creation date.
+            schedule.setCreateDate(new Date());
+            // While create last updated is the creation date.
+            schedule.setUpdateDate(new Date());
+
+            Schedule newSchedule = repository.save(schedule);
+
+            scheduleDTO = mapper.map(newSchedule, ScheduleDTO.class);
 
             // Log info after successful creation
             log.info("Schedule creation successful with ID: {}", scheduleDTO.getId());

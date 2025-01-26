@@ -1,8 +1,8 @@
 package com.task.poc.service;
 
-import com.task.poc.models.dto.schedule.ScheduleDTO;
-import com.task.poc.models.dto.schedule.ScheduleListDTO;
-import com.task.poc.models.dto.schedule.ScheduleRequestDTO;
+import com.task.poc.models.schedule.ScheduleDTO;
+import com.task.poc.models.schedule.ScheduleListDTO;
+import com.task.poc.models.schedule.ScheduleRequestDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface SchedulerService {

@@ -1,11 +1,10 @@
-package com.task.poc.models.dto.other;
+package com.task.poc.models.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -20,6 +19,4 @@ public class ScheduleInfoDTO {
     private boolean isRecurring;
     private String recurrencePattern;
     private String notes;
-    private Date createdDate;
-    private Date lastUpdated;
 }

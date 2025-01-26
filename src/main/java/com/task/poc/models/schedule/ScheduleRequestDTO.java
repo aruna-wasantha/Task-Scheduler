@@ -1,6 +1,6 @@
-package com.task.poc.models.dto.schedule;
+package com.task.poc.models.schedule;
 
-import com.task.poc.models.dto.other.ScheduleInfoDTO;
+import com.task.poc.models.common.ScheduleInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +12,8 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScheduleDTO {
-    private String id;
+public class ScheduleRequestDTO {
     private String name;
     private Date startDateTime;
-    ScheduleInfoDTO info;
+    private ScheduleInfoDTO info;
 }
