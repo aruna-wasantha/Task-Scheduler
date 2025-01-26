@@ -9,4 +9,4 @@ spring:
     name: poc
   data:
     mongodb:
-      uri:  mongodb://mongodb:27017/schedules
+      uri: mongodb://localhost:27017/schedules
