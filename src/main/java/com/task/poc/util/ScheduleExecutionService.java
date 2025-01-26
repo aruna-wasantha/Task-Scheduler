@@ -2,6 +2,7 @@ package com.task.poc.util;
 
 import com.task.poc.models.database.Schedule;
 import com.task.poc.repository.SchedulerRepository;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -29,6 +30,10 @@ public class ScheduleExecutionService {
 
     @Autowired
     private SchedulerRepository repository;
+
+    // Inject the external API URL from the application.yml file
+    @Value("${external.api.url}")
+    private String externalApiUrl;
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(5); // Thread pool for parallel execution
 
@@ -101,23 +106,22 @@ public class ScheduleExecutionService {
      *
      * @param schedule The schedule whose task is being executed.
      */
-    private void mockExternalApiCall(Schedule schedule) {
+    public void mockExternalApiCall(Schedule schedule) {
         // Simulate an external API call for schedule with ID
         log.info("Simulating external API call for schedule with ID: {}", schedule.getId());
 
         // Build the URL with the schedule ID as a query parameter
-        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:7000/api/mock-api")
+        String url = UriComponentsBuilder.fromHttpUrl(externalApiUrl)
                 .queryParam("id", schedule.getId())
                 .toUriString();
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
-        // Prepare the request entity (nobody needed for this case)
+        // Prepare the request entity (no body needed for this case)
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
-        // Send a POST request to the local endpoint with the schedule ID as a query parameter
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
         try {
@@ -126,7 +130,6 @@ public class ScheduleExecutionService {
 
             // Log the response (or handle as needed)
             log.info("Response from external API: {}", response.getStatusCode());
-
         } catch (Exception e) {
             log.error("Error while calling external API: {}", e.getMessage());
         }

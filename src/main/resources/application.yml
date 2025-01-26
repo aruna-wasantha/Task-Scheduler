@@ -1,12 +1,15 @@
-#Server Configuration
+# Server Configuration
 server:
   port: 9000
 
-
-#Spring Configuration
+# Spring Configuration
 spring:
   application:
     name: poc
   data:
     mongodb:
-      uri: mongodb://localhost:27017/schedules
+      uri: ${MONGODB_URI:mongodb://localhost:27017/schedules}
+
+external:
+  api:
+    url: ${MOCK_API_URL:http://localhost:7000/api/mock-api}
