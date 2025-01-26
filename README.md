@@ -8,7 +8,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 ## Prerequisites
 1. **Docker** installed and running.
 2. **MongoDB** setup using Docker.
-3. **Java 17** or later installed.
+3. **Java 21** or later installed.
 4. **Postman** to test the API using the provided collection.
 
 ---
