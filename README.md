@@ -7,30 +7,52 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 
 ## Prerequisites
 1. **Docker** installed and running.
-2. **MongoDB** setup using Docker.
-3. **Java 21** or later installed.
-4. **Postman** to test the API using the provided collection.
+2. **Java 21** or later installed.
+3. **Postman** to test the API using the provided collection.
 
 ---
 
 ## Setup Instructions
 
-### Step 1: Set up MongoDB using Docker
+### Option 1: Run Using Docker
+
+#### Step 1: Set up MongoDB and Services Using Docker
 1. Create a `docker-compose.yml` file with the following content:
 
    ```yaml
    version: '3.8'
 
    services:
-     mongodb:
+     mongodb-scheduler:
        image: mongo:latest
-       container_name: mongodb
+       container_name: mongodb-scheduler
        ports:
          - "27017:27017"
        volumes:
          - mongodb_data:/data/db
        networks:
          - app-network
+
+     mock-api-service:
+       image: arunawasantha/mock-api-service:latest
+       container_name: mock-api-service
+       ports:
+         - "7000:7000"
+       networks:
+         - app-network
+
+     scheduler-service:
+       image: arunawasantha/scheduler-service:latest
+       container_name: scheduler-service
+       ports:
+         - "9000:9000"
+       environment:
+         - MONGODB_URI=mongodb://mongodb-scheduler:27017/schedules
+         - MOCK_API_URL=http://mock-api-service:7000/api/mock-api
+       networks:
+         - app-network
+       depends_on:
+         - mongodb-scheduler
 
    volumes:
      mongodb_data:
@@ -44,11 +66,13 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
    ```bash
    docker-compose up -d
    ```
-   This will start a MongoDB instance locally.
+   This will start MongoDB, the mock API service, and the scheduler service locally.
 
 ---
 
-### Step 2: Clone the Projects
+### Option 2: Run Applications Using IntelliJ IDEA
+
+#### Step 1: Clone the Projects
 1. Clone the Mock API project:
    ```bash
    git clone https://github.com/aruna-wasantha/mock-api.git
@@ -57,6 +81,19 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
    ```bash
    git clone https://github.com/aruna-wasantha/Task-Scheduler.git
    ```
+
+#### Step 2: Run Applications in IntelliJ IDEA
+1. Open IntelliJ IDEA and import both projects (`mock-api` and `Task-Scheduler`) as Maven projects.
+2. Ensure the required dependencies are downloaded by building the projects:
+   ```bash
+   ./mvnw clean install
+   ```
+3. To run the Mock API project:
+   - Navigate to the `mock-api` project in IntelliJ.
+   - Locate the main class (e.g., `MockApiApplication.java`) and run it.
+4. To run the Task Scheduler project:
+   - Navigate to the `Task-Scheduler` project in IntelliJ.
+   - Locate the main class (e.g., `TaskSchedulerApplication.java`) and run it.
 
 ---
 
@@ -70,14 +107,6 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 
 ---
 
-### Step 4: Run the Application
-1. Start the Mock API project:
-    - Navigate to the cloned `mock-api` open with Intelij idea and run the application (requires JDK 21).
-2. Start the Task Scheduler project:
-    - Navigate to the cloned `Task-Scheduler` directory  open with Intelij idea and run the application (requires JDK 21).
-
----
-
 ## Application Features
 1. **CRUD Operations**: Create, Read, Update, and Delete scheduled tasks via API.
 2. **Event Triggering**: The system checks the database every 30 seconds to find scheduled tasks.
@@ -86,7 +115,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 ---
 
 ## Additional Notes
-- Ensure MongoDB is running locally before starting the application.
-- Use the Postman collection for testing and interacting with the APIs.
+- Use Docker to simplify the setup and deployment of the services.
+- When running locally with IntelliJ IDEA, ensure MongoDB is running.
 - Logs will provide details of triggered events and their results.
 
