@@ -8,7 +8,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 ## Prerequisites
 1. **Docker** installed and running.
 2. **Java 21** or later installed.
-3. **Postman** to test the API using the provided collection.
+3. **Postman** installed to test the API using the provided collection.
 
 ---
 
@@ -16,7 +16,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 
 ### Option 1: Run Using Docker
 
-#### Step 1: Set up MongoDB and Services Using Docker
+#### Step 1: Set Up MongoDB and Services Using Docker
 1. Create a `docker-compose.yml` file with the following content:
 
    ```yaml
@@ -53,6 +53,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
          - app-network
        depends_on:
          - mongodb-scheduler
+         - mock-api-service
 
    volumes:
      mongodb_data:
@@ -100,7 +101,7 @@ The Task Scheduler System is a Java Spring Boot application that performs CRUD o
 ### Step 3: Import Postman Collection
 1. Download the Postman collection from:
    ```
-   https://github.com/aruna-wasantha/scheduller-api.git
+   https://github.com/aruna-wasantha/scheduler-api.git
    ```
 2. Open Postman and import the downloaded collection.
 3. Use the provided endpoints to interact with the Task Scheduler API.
