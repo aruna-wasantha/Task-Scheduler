@@ -4,6 +4,9 @@ import com.task.poc.models.database.Schedule;
 import com.task.poc.repository.SchedulerRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -102,17 +105,24 @@ public class ScheduleExecutionService {
         // Simulate an external API call for schedule with ID
         log.info("Simulating external API call for schedule with ID: {}", schedule.getId());
 
-        // Create the URL with the schedule ID as a query parameter
-        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:3000/your-endpoint")
+        // Build the URL with the schedule ID as a query parameter
+        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:7000/api/mock-api")
                 .queryParam("id", schedule.getId())
                 .toUriString();
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
+        // Prepare the request entity (nobody needed for this case)
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        // Send a POST request to the local endpoint with the schedule ID as a query parameter
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
         try {
-            // Send a GET request to the local endpoint with the schedule ID as a query parameter
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            // Use POST method with the URL containing the query parameter
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
             // Log the response (or handle as needed)
             log.info("Response from external API: {}", response.getStatusCode());
