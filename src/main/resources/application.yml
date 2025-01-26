@@ -1,0 +1,7 @@
+spring:
+  application:
+  name: poc
+
+#Server Configuration
+server:
+  port: 9000
